@@ -1,5 +1,23 @@
-
 function Write-Log {
+    <#
+.SYNOPSIS
+Writes log in a format compatible with CMTrace log tool.
+.DESCRIPTION
+This function saves log file as CCM.log in $ProgramDataPath\CCM\Logs directory in a specific
+format so that it can be easily read by Configuration Manager Trace Log Tool.
+.PARAMETER Message
+Adds message in the log file.
+.PARAMETER Component
+Specifies component name relative to the message saved.
+.PARAMETER Type
+Valid values: Info, Warning or Error. Will display the message according to 
+the type of message. Info has a standard colour. Warning and Error has a 
+yello and red colour background respectively.
+.EXAMPLE
+Write-Log -Message "Cache Size is 100MB" -Component "CacheSize" -Type Info
+This example will add an Informational log line with a message listed above
+and it will add Component name in the Component Column.
+#>
     [CmdletBinding()]
      param(
      [Parameter()]
@@ -19,12 +37,12 @@ function Write-Log {
         }
 
 $ProgramDataPath = ($env:ProgramData)
-$LogFile = "$ProgramDataPath\CCMCache\Logs\CCMCache.log"
+$LogFile = "$ProgramDataPath\CCM\Logs\CCM.log"
 
 if(-not(Test-Path $LogFile))
     {
-        New-Item -Name CCMCache.log -ItemType File `
-        -Path "$ProgramDataPath\CCMCache\Logs\" -Force
+        New-Item -Name CCM.log -ItemType File `
+        -Path "$ProgramDataPath\CCM\Logs\" -Force
     }
     
     $LogTime = "$(Get-Date -Format HH:mm:ss).$((Get-Date).Millisecond)+000"
@@ -34,4 +52,4 @@ if(-not(Test-Path $LogFile))
     $LogEntry = $LogEntry -f $LogFormat
     Add-Content -Value $LogEntry -Path $LogFile
 
-} #write-Log
+}
