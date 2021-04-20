@@ -54,11 +54,24 @@ function Write-Log {
             "Warning" { [int]$Type = 2 }
             "Error" { [int]$Type = 3 }
             }
-    if(-not(Test-Path $LogFile))
-    {
-        New-Item -Name CCM.log -ItemType File `
-        -Path "$ProgramDataPath\CCM\Logs\" -Force
-    }
+    
+        if ((Test-Path $LogFile)) {
+            $LogSize = (Get-Item -Path $LogFile).Length/1MB
+            $maxLogSize = 5
+            }
+        # Check for file size of the log. If greater than 5MB, it will create a new one and delete the old.
+        if ((Test-Path $LogFile) -AND $LogSize -gt $MaxLogSize) {
+            Write-Error "Log file $LogFile already exists. Deleting $LogFile and creating new one"
+            Remove-Item $LogFile -Force
+            New-Item -Path $LogFile -ItemType File -Force
+            }
+        # If attempting to write to a log file in a folder/path that doesn't exist create the file including the path.
+        elseif(-not(Test-Path $LogFile))
+            {
+            Write-Verbose "Creating $LogFile"
+            New-Item -Path $LogFile -ItemType File -Force
+            }
+
     
     $LogTime = "$(Get-Date -Format HH:mm:ss).$((Get-Date).Millisecond)+000"
     $LogDate = (Get-Date -Format MM-dd-yyyy)
