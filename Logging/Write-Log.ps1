@@ -20,14 +20,12 @@ and it will add Component name in the Component Column.
 #>
     [CmdletBinding()]
      param(
-     [Parameter()]
-     [ValidateNotNullOrEmpty()]
-     [string]$Message,
-     [parameter(Mandatory=$true)]
-     [String]$Component,
-     [Parameter(Mandatory=$true)]
-     [ValidateSet("Info", "Warning", "Error")]
-     [String]$Type
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]$Message, [parameter(Mandatory=$true)]
+        [String]$Component, [Parameter(Mandatory=$true)]
+        [ValidateSet("Info", "Warning", "Error")]
+        [String]$Type
      )
 
      switch ($Type) {
