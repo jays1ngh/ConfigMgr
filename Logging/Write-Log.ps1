@@ -23,6 +23,8 @@ and it will add Component name in the Component Column.
      [Parameter()]
      [ValidateNotNullOrEmpty()]
      [string]$Message,
+     [Parameter(Mandatory=$false)]
+     [string]$LogFile = "$env:ProgramData\CCM\Logs\CCM.log",
      [parameter(Mandatory=$true)]
      [String]$Component,
      [Parameter(Mandatory=$true)]
@@ -30,16 +32,20 @@ and it will add Component name in the Component Column.
      [String]$Type
      )
 
-     switch ($Type) {
-        "Info" { [int]$Type = 1 }
-        "Warning" { [int]$Type = 2 }
-        "Error" { [int]$Type = 3 }
+
+    Begin {
+        # Set VerbosePreference to Continue so that verbose messages are displayed.
+        $verbosePreference = 'Continue'
         }
-
-$ProgramDataPath = ($env:ProgramData)
-$LogFile = "$ProgramDataPath\CCM\Logs\CCM.log"
-
-if(-not(Test-Path $LogFile))
+    
+    Process {
+    
+        switch ($Type) {
+            "Info" { [int]$Type = 1 }
+            "Warning" { [int]$Type = 2 }
+            "Error" { [int]$Type = 3 }
+            }
+    if(-not(Test-Path $LogFile))
     {
         New-Item -Name CCM.log -ItemType File `
         -Path "$ProgramDataPath\CCM\Logs\" -Force
@@ -51,5 +57,8 @@ if(-not(Test-Path $LogFile))
     $LogFormat = $Message, $LogTime, $LogDate, $Component, $Type
     $LogEntry = $LogEntry -f $LogFormat
     Add-Content -Value $LogEntry -Path $LogFile
+    }
 
+    End {   
+    }
 }
