@@ -1,5 +1,4 @@
-function Write-Log {
-    <#
+<#
 .SYNOPSIS
 Writes log in a format compatible with CMTrace log tool.
 .DESCRIPTION
@@ -17,7 +16,17 @@ yello and red colour background respectively.
 Write-Log -Message "Cache Size is 100MB" -Component "CacheSize" -Type Info
 This example will add an Informational log line with a message listed above
 and it will add Component name in the Component Column.
+.NOTES
+    Filename: Write-Log.ps1
+    Version: 1.0
+    Author: Jay Singh
+    Blog: www.blog.masteringmdm.com
+    Twitter: @thisisjaysingh
+    Version history:
+    1.0   -   Script created  
+
 #>
+function Write-Log {
     [CmdletBinding()]
      param(
      [Parameter()]
