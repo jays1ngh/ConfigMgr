@@ -1,5 +1,4 @@
-function Write-Log {
-    <#
+<#
 .SYNOPSIS
 Writes log in a format compatible with CMTrace log tool.
 .DESCRIPTION
@@ -18,38 +17,64 @@ Write-Log -Message "Cache Size is 100MB" -Component "CacheSize" -Type Info
 This example will add an Informational log line with a message listed above
 and it will add Component name in the Component Column.
 #>
+
+function Write-Log {
+
     [CmdletBinding()]
      param(
      [Parameter()]
      [ValidateNotNullOrEmpty()]
      [string]$Message,
-     [parameter(Mandatory=$true)]
-     [String]$Component,
+     [Parameter(Mandatory=$false)]
+     [string]$LogFile = "$env:ProgramData\CCM\Logs\ClearConfigMgrCache.log",
+     [parameter(Mandatory=$false)]
+     [String]$Component = "",
      [Parameter(Mandatory=$true)]
      [ValidateSet("Info", "Warning", "Error")]
      [String]$Type
      )
 
-     switch ($Type) {
-        "Info" { [int]$Type = 1 }
-        "Warning" { [int]$Type = 2 }
-        "Error" { [int]$Type = 3 }
+    Begin {
+        # Set VerbosePreference to Continue so that verbose messages are displayed.
+        $verbosePreference = 'Continue'
         }
 
-$ProgramDataPath = ($env:ProgramData)
-$LogFile = "$ProgramDataPath\CCM\Logs\CCM.log"
+    Process {
 
-if(-not(Test-Path $LogFile))
-    {
-        New-Item -Name CCM.log -ItemType File `
-        -Path "$ProgramDataPath\CCM\Logs\" -Force
-    }
-    
+        switch ($Type) {
+            "Info" { [int]$Type = 1 }
+            "Warning" { [int]$Type = 2 }
+            "Error" { [int]$Type = 3 }
+            }
+
+        if ((Test-Path $LogFile)) {
+            $LogSize = (Get-Item -Path $LogFile).Length/1MB
+            $maxLogSize = 5
+            }
+
+            # Check for file size of the log. If greater than 5MB, it will create a new one and delete the old.
+        if ((Test-Path $LogFile) -AND $LogSize -gt $MaxLogSize) {
+            Write-Error "Log file $LogFile already exists. Deleting $LogFile and creating new one"
+            Remove-Item $LogFile -Force
+            New-Item -Path $LogFile -ItemType File -Force
+            }
+
+            # If attempting to write to a log file in a folder/path that doesn't exist create the file including the path.
+        elseif(-not(Test-Path $LogFile))
+            {
+            Write-Verbose "Creating $LogFile"
+            New-Item -Path $LogFile -ItemType File -Force
+            }
+
     $LogTime = "$(Get-Date -Format HH:mm:ss).$((Get-Date).Millisecond)+000"
     $LogDate = (Get-Date -Format MM-dd-yyyy)
     $LogEntry = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}" context="" type="{4}" thread="" file="">'
     $LogFormat = $Message, $LogTime, $LogDate, $Component, $Type
     $LogEntry = $LogEntry -f $LogFormat
-    Add-Content -Value $LogEntry -Path $LogFile
+    # Out-File -InputObject $LogLine -Append -NoClobber -Encoding Default -FilePath $LogFile -WhatIf:$False
+    Out-File -InputObject $LogEntry -Append -NoClobber -Encoding default -FilePath $LogFile
+    }
 
-}
+    End {
+    }
+} #End function Write-Log
